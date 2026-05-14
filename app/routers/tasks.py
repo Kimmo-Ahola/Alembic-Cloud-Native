@@ -29,6 +29,7 @@ def create_task(payload: schemas.TaskCreate, db: Session = Depends(get_db)):
     The `title` is required. `description` and `done` are optional.
     """
     task = model.Task(**payload.model_dump())
+
     db.add(task)
     db.commit()
 
@@ -46,8 +47,14 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     task = db.get(model.Task, task_id)  # detta är den
     # SQLAlchemy har 2 olika stilar: query style och den nyare stilen
     # query style anses vara deprecated med stöds fortfarande
+    
     if task is None:
         raise TaskNotFound(task_id)
+    
+    # nytt databasanrop
+    # n+1 query problem
+    # gör aldrig detta i en loop
+    # task.category
 
     return task
 
@@ -88,3 +95,24 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
 
     db.delete(task)
     db.commit()
+
+
+cat_router = APIRouter(
+    prefix="/categories",
+    tags=["categories"]
+)
+
+@cat_router.post("", response_model=schemas.CategoryRead, status_code=201)
+def create_category(payload: schemas.CategoryCreate, db: Session = Depends(get_db)):
+    # OBS! name är unique, felhantering behövs egentligen
+    # övning, kolla det först innan vi skapar och skicka korrekt statuskod
+    category = model.Category(**payload.model_dump())
+    db.add(category)
+    db.commit()
+    db.refresh(category)
+
+    return category
+
+@cat_router.get("", response_model=list[schemas.CategoryRead])
+def list_categories(db: Session = Depends(get_db)):
+    return db.query(model.Category).all()

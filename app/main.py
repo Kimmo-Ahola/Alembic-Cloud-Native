@@ -33,6 +33,7 @@ A simple tasks API built as a demo.
 )
 # lägg till våra routers till app-objektet
 app.include_router(tasks.router)
+app.include_router(tasks.cat_router)
 
 
 @app.get("/")

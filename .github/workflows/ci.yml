@@ -1,0 +1,39 @@
+name: Tests using services
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services: # vi använder GitHub Actions services, inte vår docker-compose
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tasks
+          POSTGRES_PASSWORD: tasks
+          POSTGRES_DB: tasks
+        ports:
+          - "5433:5432"
+        options: >-
+         --health-cmd "pg_isready -U tasks"
+         --health_interval 5s
+         --health-timeout 5s
+         --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt
+
+      - run: pytest -v
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg2://tasks:tasks@localhost:5433/tasks_test
+
+
+

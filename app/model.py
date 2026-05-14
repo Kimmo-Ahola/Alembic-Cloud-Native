@@ -1,4 +1,4 @@
-# Databasmodell, detta sparas till sqlite
+# Databasmodell, detta sparas till postgres
 
 from datetime import datetime
 from typing import Optional
@@ -14,7 +14,7 @@ class Category(Base):
     category_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
 
-    # tasks: Mapped[list["Task"]] = relationship(back_populates="category")
+    tasks: Mapped[list["Task"]] = relationship(back_populates="category")
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -30,4 +30,6 @@ class Task(Base):
         ForeignKey("categories.category_id"), default=None
     )
 
-    # category: Mapped[Optional["Category"]] = relationship(back_populates="tasks")
+    # lite riskabelt att göra en automatisk join på detta sätt
+
+    category: Mapped[Optional["Category"]] = relationship(back_populates="tasks")

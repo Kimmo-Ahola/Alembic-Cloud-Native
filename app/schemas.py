@@ -9,6 +9,45 @@ class ErrorResponse(BaseModel):
     detail: str = Field(examples=["Task 42 not found"])
 
 
+"""
+Modeller för category med pydantic
+"""
+
+
+class CategoryBase(BaseModel):
+    name: str = Field(
+        min_length=1,
+        max_length=100,  # ska egentligen matcha databasen, eller ska helst göra det
+        description="Category name, must be unique",
+        examples=["Work", "Home"],
+    )
+
+    ConfigDict(
+        from_attributes=True, 
+        str_strip_whitespace=True, 
+        extra="forbid"
+    )
+
+
+class CategoryCreate(CategoryBase):
+    pass
+
+
+# kan vara patch så vi vill ha optional
+class CategoryUpdate(BaseModel):
+    name: str | None = Field(
+        min_length=1,
+        max_length=100,  # ska egentligen matcha databasen, eller ska helst göra det
+        description="Optional. Omit to leave unchanged",
+    )
+
+
+class CategoryRead(CategoryBase):
+    category_id: int # måste heta samma som kolumnen eftersom de är kopplade
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class TaskBase(BaseModel):
     title: str = Field(
         min_length=1,
@@ -17,6 +56,12 @@ class TaskBase(BaseModel):
         examples=["Buy milk", "Do your homework", "Send in report"],
     )
     description: str | None = None
+
+    category_id: int | None = Field(
+        default=None,
+        description="Id of the category. Optional",
+        examples=[1]
+    )
 
 
 class TaskCreate(TaskBase):  # i POST
@@ -35,11 +80,15 @@ class TaskUpdate(BaseModel):  # i PUT/PATCH
     description: str | None = None
     done: bool | None = None
 
+    category_id: int | None = None
+
 
 class TaskRead(TaskBase):  # i GET
     id: int
     done: bool
     created_at: datetime
+
+    category: CategoryRead | None = None
 
     model_config = ConfigDict(
         from_attributes=True,
