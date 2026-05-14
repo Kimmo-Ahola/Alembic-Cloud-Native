@@ -19,7 +19,7 @@ jobs:
           - "5433:5432"
         options: >-
          --health-cmd "pg_isready -U tasks"
-         --health_interval 5s
+         --health-interval 5s
          --health-timeout 5s
          --health-retries 5
     
