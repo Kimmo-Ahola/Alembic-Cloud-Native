@@ -2,10 +2,13 @@
 from fastapi import FastAPI
 from app.database import Base, engine
 from app.routers import tasks
+
 # skapar databasen automatiskt baserat på våra klasser
 # all som ärver från Base skapas
 # vi ska ersätta med alembic nästa lektion
-Base.metadata.create_all(bind=engine)
+
+# Inga fler automatiska migrationer utan nu kör vi alembic
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="My demo api",
@@ -24,10 +27,10 @@ A simple tasks API built as a demo.
 
 <h1>Header 1</h1>
 """,
-version="0.1.0",
-contact={"name":"Kimmo Ahola", "email":"kimmo@ahola.email.com"},
-license_info={"name":"MIT"}
-    )
+    version="0.1.0",
+    contact={"name": "Kimmo Ahola", "email": "kimmo@ahola.email.com"},
+    license_info={"name": "MIT"},
+)
 # lägg till våra routers till app-objektet
 app.include_router(tasks.router)
 
